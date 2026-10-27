@@ -57,7 +57,7 @@ app.get('/tts', async (req, res) => {
   if (fs.existsSync(cached)) return res.set('Cache-Control', 'public, max-age=86400').sendFile(cached);
   if (!edgeOk) return res.status(404).end();
   try {
-    if (!pending.has(h)) pending.set(h, edgeTts(text, cached).finally(() => pending.delete(h)));
+    if (!pending.has(h)) pending.set(h, edgeTts(text, cached).catch(() => new Promise(r => setTimeout(r, 400)).then(() => edgeTts(text, cached))).finally(() => pending.delete(h)));
     await pending.get(h);
     res.set('Cache-Control', 'public, max-age=86400').sendFile(cached);
   } catch (e) {
