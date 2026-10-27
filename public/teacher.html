@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전통문화 Auto Pets · 선생님</title>
+<link rel="stylesheet" href="css/common.css">
+<style>
+#stage{background:url(img/bg_main.webp) center/cover}
+#head{position:absolute;left:0;top:0;width:1672px;height:118px;background:linear-gradient(#6b4220,#4d2c10);border-bottom:6px solid #2f1a07;box-shadow:0 6px 12px rgba(0,0,0,.3)}
+#head .logo{position:absolute;left:10px;top:2px;width:262px}
+#tabs{position:absolute;left:300px;top:18px;display:flex;gap:10px}
+#tabs button{width:204px;height:84px;position:relative;transition:transform .12s,filter .12s}
+#tabs button img{width:100%;height:100%;object-fit:contain}
+#tabs button.on{transform:translateY(-4px) scale(1.06);filter:drop-shadow(0 0 10px #ffd84a) brightness(1.12)}
+#tabs button:not(.on){filter:brightness(.82)}
+#codeBox{position:absolute;right:16px;top:12px;width:300px;height:94px;background:linear-gradient(#fff3d6,#efd59f);border:5px solid #2f1a07;border-radius:18px;text-align:center;line-height:1.1;padding-top:6px}
+#codeBox small{font-size:20px;display:block}
+#codeBox b{font-size:54px;letter-spacing:6px;color:#a0451c;-webkit-text-stroke:2px currentColor}
+.tab{position:absolute;left:0;top:124px;width:1672px;height:817px;display:none}
+.tab.on{display:block}
+.ph{font-size:30px;display:flex;align-items:center;gap:10px;-webkit-text-stroke:1.1px currentColor;margin-bottom:6px}
+.ph img{height:40px}
+.ph .r{margin-left:auto;font-size:22px;-webkit-text-stroke:.5px currentColor}
+.chip{display:inline-block;border-radius:12px;padding:1px 10px;font-size:19px;color:#fff;-webkit-text-stroke:.4px currentColor;white-space:nowrap}
+.chip.lobby{background:#9a8a7a}.chip.quiz{background:#2c86e3}.chip.shop{background:#e09a12}.chip.waiting{background:#8a55e0}.chip.battle{background:#e8463b}.chip.done{background:#33ad4c}.chip.off{background:#555}
+/* 게임 관리 */
+#pStu{left:14px;top:30px;width:420px;height:772px}
+#stuList{position:absolute;inset:50px 0 0;overflow-y:auto}
+.srow{display:flex;align-items:center;gap:8px;padding:4px 6px;border-bottom:2px dashed #ead4a6;font-size:23px}
+.srow img{width:44px}
+.srow .n{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow .rd{font-size:19px;color:#7a4416;width:60px;text-align:right}
+#pMid{left:450px;top:30px;width:780px;height:772px}
+#pairs{position:absolute;left:0;right:0;top:50px;height:330px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.pair{background:#fffaf0;border:4px solid #e7cf9f;border-radius:18px;display:flex;align-items:center;justify-content:space-around;height:96px;font-size:22px}
+.pair .p{display:flex;flex-direction:column;align-items:center;width:130px}
+.pair .p img{width:56px}
+.pair .vs{font-size:34px}
+#midBtns{position:absolute;left:0;right:0;top:392px;display:flex;gap:14px;justify-content:center}
+#midBtns button{position:relative;width:370px;height:56px}
+#queueBox{position:absolute;left:0;right:0;top:462px;height:94px;background:#fffaf0;border:4px solid #e7cf9f;border-radius:18px;display:flex;align-items:center;gap:10px;padding:0 14px;font-size:22px;overflow:hidden}
+#queueBox .q{display:flex;flex-direction:column;align-items:center;font-size:18px}
+#queueBox .q img{width:50px}
+#btlBox{position:absolute;left:0;right:0;top:566px;bottom:0;overflow-y:auto}
+.brow{display:flex;align-items:center;gap:8px;font-size:21px;padding:4px 8px;border-bottom:2px dashed #ead4a6}
+.brow b{color:#a0451c}
+#pCtl{left:1246px;top:30px;width:412px;height:350px}
+#ctlBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+#ctlBtns .gbtn{position:relative;height:68px;width:100%}
+#ctlBtns .cssbtn{position:relative;height:62px;font-size:26px}
+#stat{display:flex;gap:10px;margin-top:10px}
+#stat div{flex:1;background:#fffaf0;border:4px solid #e7cf9f;border-radius:16px;text-align:center;font-size:20px;padding:4px}
+#stat b{display:block;font-size:30px;color:#a0451c;white-space:nowrap}
+#pRank{left:1246px;top:396px;width:412px;height:406px}
+#rankBox{position:absolute;inset:50px 0 0;overflow-y:auto}
+table.t{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:21px;text-align:center}
+table.t th{background:#e9cf98;font-size:19px;padding:4px;position:sticky;top:0}
+table.t td{background:#fffaf0;padding:3px 4px}
+table.t img{height:36px;display:inline-block;vertical-align:middle}
+/* 학생 관리 */
+#pStu2{left:14px;top:30px;width:1644px;height:772px}
+#stuTable{position:absolute;inset:56px 0 0;overflow-y:auto}
+#stuTable table.t{font-size:24px}
+#stuTable .trash{width:44px;height:44px;position:relative;display:inline-block}
+/* 문제 관리 */
+#pQ{left:14px;top:30px;width:1060px;height:772px}
+#qTable{position:absolute;inset:56px 0 0;overflow-y:auto}
+#qTable table.t{font-size:20px;text-align:left}
+#qTable td{vertical-align:middle}
+#qTable .mb{font-size:18px;height:40px;padding:0 12px;position:relative;border-radius:14px}
+#pQE{left:1090px;top:30px;width:568px;height:772px}
+.fl{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:22px}
+.fl label{width:90px;text-align:right;flex:none}
+.fl input,.fl select{flex:1;height:46px;font-size:22px;border:3px solid #e2c48f;border-radius:14px;padding:0 10px;background:#fff}
+.picrow{display:flex;gap:6px;flex-wrap:wrap}
+.picrow button{width:62px;height:62px;border-radius:14px;border:3px solid #e2c48f;background:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+.picrow button img{width:52px}
+.picrow button.sel{border-color:#2c86e3;box-shadow:0 0 0 3px #9fd4ff}
+#bulk{width:100%;height:150px;font-size:17px;border:3px solid #e2c48f;border-radius:14px;padding:8px;line-height:1.4}
+/* 도감 / 설정 */
+#pDex{left:14px;top:30px;width:1644px;height:772px}
+#dexBox{position:absolute;inset:4px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+#dexBox .dex{margin:0}
+#pSet{left:336px;top:40px;width:1000px;height:740px}
+.setrow{display:flex;align-items:center;justify-content:space-between;background:#fffaf0;border:4px solid #e7cf9f;border-radius:20px;padding:10px 20px;margin-bottom:12px;font-size:26px}
+.setrow small{display:block;font-size:19px;color:#8a5a2b}
+.seg{display:flex;gap:8px}
+.seg button{min-width:76px;height:56px;border-radius:14px;background:#f0e0bf;border:3px solid #c9a676;font-size:26px;padding:0 12px}
+.seg button.sel{background:linear-gradient(#ffe46b,#ffb81c);border-color:#a06c00}
+/* 방 만들기 */
+#start{position:absolute;inset:0;z-index:50;background:url(img/bg_main.webp) center/cover}
+#start .frame{left:436px;top:200px;width:800px;height:520px;text-align:center}
+#start .logo{width:420px;margin:-80px auto 0}
+#start p{font-size:28px;line-height:1.5;margin:10px 0}
+#start .gbtn{left:150px;top:360px;width:440px;height:66px}
+#start .re{position:absolute;left:0;right:0;top:300px;font-size:22px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+<div id="head">
+  <img class="logo" src="img/logo.webp">
+  <div id="tabs">
+    <button data-t="game" class="on" onclick="T.tab('game')"><img src="img/tab_game.webp" alt="게임 관리"></button>
+    <button data-t="stu" onclick="T.tab('stu')"><img src="img/tab_student.webp" alt="학생 관리"></button>
+    <button data-t="quiz" onclick="T.tab('quiz')"><img src="img/tab_quiz.webp" alt="문제 관리"></button>
+    <button data-t="dex" onclick="T.tab('dex')"><img src="img/tab_dex.webp" alt="캐릭터 도감"></button>
+    <button data-t="set" onclick="T.tab('set')" style="width:150px"><img src="img/tab_set.webp" alt="설정"></button>
+  </div>
+  <div id="codeBox"><small>학생 입장 방 번호</small><b id="code">----</b></div>
+</div>
+
+<!-- 게임 관리 -->
+<div class="tab on" id="tab-game">
+  <div id="pStu" class="frame plain"><div class="ph"><img src="img/r_song.webp">학생 접속 현황 <span class="r" id="stuCnt"></span></div><div id="stuList"></div></div>
+  <div id="pMid" class="frame plain">
+    <div class="ph"><img src="img/i_swords.webp">1라운드 대결 배정 <span class="r">그다음부터는 준비를 마친 학생끼리 자동으로 만나요</span></div>
+    <div id="pairs"></div>
+    <div id="midBtns">
+      <button class="gbtn" onclick="T.assign()"><img src="img/y_auto_y.webp" alt="자동 팀 배정"></button>
+      <button class="gbtn" onclick="T.assign()"><img src="img/y_reassign.webp" alt="팀 재배정"></button>
+    </div>
+    <div id="queueBox"></div>
+    <div id="btlBox"></div>
+  </div>
+  <div id="pCtl" class="frame flower2">
+    <div class="ph"><img src="img/i_gear.webp">게임 진행 제어</div>
+    <div id="ctlBtns">
+      <button class="gbtn" id="btnStart" onclick="T.start()"><img src="img/b_battle.webp" alt="전투 시작 (게임 시작)"></button>
+      <button class="gbtn" id="btnPause" onclick="T.pause()"><img src="img/b_pause.webp" alt="일시정지"></button>
+      <button class="gbtn" id="btnMatch" onclick="T.matchNow()"><img src="img/b_autobattle.webp" alt="자동 전투 (기다리는 학생 바로 매칭)"></button>
+      <button class="cssbtn red" id="btnEnd" onclick="T.end()">게임 종료</button>
+    </div>
+    <div id="stat"><div>상태<b id="sStatus">대기</b></div><div>학생<b id="sCnt">0</b></div><div>대결<b id="sBtl">0</b></div></div>
+  </div>
+  <div id="pRank" class="frame plain"><div class="ph"><img src="img/i_trophy.webp">실시간 순위 <button class="cssbtn cream" style="position:relative;margin-left:auto;height:40px;font-size:19px;padding:0 12px;border-width:3px" onclick="T.csv()">결과 저장</button></div><div id="rankBox"></div></div>
+</div>
+
+<!-- 학생 관리 -->
+<div class="tab" id="tab-stu">
+  <div id="pStu2" class="frame plain"><div class="ph"><img src="img/r_gat.webp">학생 관리 <span class="r">정답률·번개 정답(빨리 맞힌 수)·팀 구성을 한눈에 볼 수 있어요</span></div><div id="stuTable"></div></div>
+</div>
+
+<!-- 문제 관리 -->
+<div class="tab" id="tab-quiz">
+  <div id="pQ" class="frame plain"><div class="ph"><img src="img/i_scroll.webp">영어 문제 목록 <span class="r" id="qCnt"></span></div><div id="qTable"></div></div>
+  <div id="pQE" class="frame flower2">
+    <div class="ph" id="qeTitle"><img src="img/i_book.webp">문제 추가</div>
+    <div class="fl"><label>질문</label><input id="fQ" placeholder="빈칸은 ___ (밑줄 3개)"></div>
+    <div class="fl"><label>정답</label><input id="fA"></div>
+    <div class="fl"><label>오답 1</label><input id="fW1"></div>
+    <div class="fl"><label>오답 2</label><input id="fW2"></div>
+    <div class="fl"><label>오답 3</label><input id="fW3"></div>
+    <div class="fl"><label>힌트</label><input id="fH" placeholder="(없어도 돼요)"></div>
+    <div class="fl"><label>그림</label><div class="picrow" id="fPic"></div></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin:10px 0">
+      <button class="cssbtn blue" style="position:relative;width:170px;height:56px;font-size:24px" onclick="T.qSave()">저장</button>
+      <button class="cssbtn cream" style="position:relative;width:170px;height:56px;font-size:24px" onclick="T.qClear()">새 문제</button>
+      <button class="cssbtn green" style="position:relative;width:170px;height:56px;font-size:24px" onclick="T.qPreview()">듣기</button>
+    </div>
+    <div style="font-size:20px;margin-top:4px">한꺼번에 붙여넣기 (한 줄에 한 문제: 질문 | 정답 | 오답1 | 오답2 | 오답3 | 그림 | 힌트)</div>
+    <textarea id="bulk" spellcheck="false"></textarea>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:8px">
+      <button class="cssbtn blue" style="position:relative;width:230px;height:52px;font-size:22px" onclick="T.bulkAdd(false)">목록에 더하기</button>
+      <button class="cssbtn red" style="position:relative;width:230px;height:52px;font-size:22px" onclick="T.bulkAdd(true)">목록 바꾸기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 도감 -->
+<div class="tab" id="tab-dex"><div id="pDex" class="frame plain"><div id="dexBox"></div></div></div>
+
+<!-- 설정 -->
+<div class="tab" id="tab-set"><div id="pSet" class="frame flower2"><div id="setBox"></div></div></div>
+
+<div id="start"><div class="frame">
+  <img class="logo" src="img/logo.webp">
+  <p><b style="font-size:36px">선생님 화면</b><br>수업 방을 만들면 4자리 방 번호가 나와요.<br>학생들은 같은 주소의 첫 화면에서 방 번호로 들어와요.</p>
+  <div class="re" id="reInfo"></div>
+  <button class="gbtn" onclick="T.create()"><img src="img/y_ok.webp" alt="확인 (방 만들기)"></button>
+</div></div>
+
+<div id="modal"><div id="mbox" class="frame"><div id="mtitle" class="ribbon gold"></div><button id="mclose" onclick="closeModal()">✕</button><div id="mbody"></div></div></div>
+<div id="conn">서버와 연결이 끊겼어요. 다시 연결하는 중…</div>
+<div id="toast"></div>
+</div></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/common.js"></script>
+<script>
+const CH = AP.CH;
+const socket = io({ transports: ['websocket', 'polling'] });
+const emit = (ev, d) => new Promise(res => socket.emit(ev, d, r => res(r || { ok: false })));
+const PH = { lobby: '대기', quiz: '문제', shop: '상점', waiting: '상대 기다림', battle: '전투', done: '끝' };
+let S = null, QS = store.get('t_questions', null) || AP.DEFAULT_QUESTIONS.map(q => ({ ...q })), SET = { ...AP.DEFAULT_SETTINGS, ...store.get('t_settings', {}) };
+let editIdx = -1, fPic = '';
+
+const T = {
+  tab(t) { $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); $$('.tab').forEach(x => x.classList.toggle('on', x.id === 'tab-' + t)); SND.click(); if (t === 'quiz') this.renderQ(); if (t === 'set') this.renderSet(); if (t === 'stu' && S) this.renderStu(); },
+  async create() {
+    const r = await emit('t:create', { questions: QS, settings: SET });
+    if (!r.ok) return toast(r.msg || '방을 만들 수 없어요');
+    store.set('t_room', { code: r.code, token: r.token }); $('#start').style.display = 'none'; SND.ok();
+  },
+  async resume() {
+    const s = store.get('t_room', null); if (!s) return false;
+    const r = await emit('t:resume', s);
+    if (r.ok) { $('#start').style.display = 'none'; return true; }
+    store.del('t_room'); return false;
+  },
+  async call(ev, d, okMsg) { const r = await emit(ev, d); if (!r.ok) { toast(r.msg || '할 수 없어요'); SND.no(); } else { if (okMsg) toast(okMsg); SND.click(); } return r; },
+  assign() { if (S && S.status === 'playing' && !confirm('게임 중이에요. 1라운드 배정을 다시 할까요?')) return; this.call('t:assign', {}, '상대를 자동으로 배정했어요!'); },
+  start() { this.call('t:start', {}, '게임을 시작했어요!'); },
+  pause() { this.call('t:pause', { paused: !(S && S.paused) }); },
+  matchNow() { this.call('t:matchNow', {}, '기다리는 학생을 바로 대결시켰어요'); },
+  end() { if (confirm('게임을 끝낼까요? 학생들 화면에 최종 순위가 나와요.')) this.call('t:end', {}, '게임을 끝냈어요'); },
+  kick(id, name) { if (confirm(`${name} 학생을 방에서 내보낼까요?`)) this.call('t:kick', { id }); },
+  render() {
+    if (!S) return;
+    $('#code').textContent = S.code;
+    const P = S.players, byId = Object.fromEntries(P.map(p => [p.id, p]));
+    $('#stuCnt').textContent = `${P.filter(p => p.online).length} / ${P.length}명 접속`;
+    $('#stuList').innerHTML = P.map(p => `<div class="srow"><img src="${IMG('r_' + p.avatar)}"><span class="n">${esc(p.name)}</span><span class="chip ${p.online ? p.phase : 'off'}">${p.online ? PH[p.phase] : '연결 끊김'}</span><span class="rd">${S.status === 'lobby' ? '' : Math.min(p.round, S.settings.rounds) + 'R'}</span></div>`).join('') || '<p style="text-align:center;font-size:24px;margin-top:80px">학생들이 방 번호로<br>들어오면 여기에 보여요</p>';
+    $('#pairs').innerHTML = S.pairs.map(([a, b]) => { const A = byId[a], Bp = byId[b]; const cell = x => x ? `<div class="p"><img src="${IMG('r_' + x.avatar)}">${esc(x.name)}</div>` : `<div class="p"><img src="${IMG('i_hourglass')}">먼저 끝난 친구</div>`; return `<div class="pair">${cell(A)}<span class="vs big-out">VS</span>${cell(Bp)}</div>`; }).join('') || `<div style="grid-column:1/3;text-align:center;font-size:24px;padding-top:110px">학생들이 다 들어오면 <b>자동 팀 배정</b>을 눌러 주세요.<br><small>배정하지 않고 시작해도 자동으로 짝을 지어요.</small></div>`;
+    $('#queueBox').innerHTML = `<b style="flex:none">상대 기다림</b>` + (S.queue.length ? S.queue.map(id => byId[id]).filter(Boolean).map(p => `<div class="q"><img src="${IMG('r_' + p.avatar)}">${esc(p.name)}</div>`).join('') : '<span style="color:#9a7a5a">지금 기다리는 학생이 없어요</span>');
+    $('#btlBox').innerHTML = S.battles.map(b => `<div class="brow"><img src="${IMG('i_swords')}" style="height:30px">${b.round}R <span>${esc(b.a)}</span> vs <span>${esc(b.b)}</span> → <b>${esc(b.winner)}</b></div>`).join('') || '<div style="text-align:center;font-size:22px;color:#9a7a5a;padding-top:30px">대결 기록이 여기에 쌓여요</div>';
+    $('#sStatus').textContent = S.status === 'lobby' ? '대기' : S.status === 'ended' ? '끝' : S.paused ? '멈춤' : '진행 중';
+    $('#sCnt').textContent = P.length; $('#sBtl').textContent = S.battles.length;
+    $('#btnStart').classList.toggle('off', S.status !== 'lobby');
+    $('#btnPause img').style.filter = S.paused ? 'hue-rotate(180deg) brightness(1.1)' : '';
+    $('#rankBox').innerHTML = `<table class="t"><tr><th>순위</th><th></th><th>이름</th><th>승</th><th>정답</th><th>번개</th></tr>${S.rank.map(r => `<tr><td>${r.rank}</td><td><img src="${IMG('r_' + r.avatar)}"></td><td>${esc(r.name)}</td><td>${r.wins}</td><td>${r.ok}/${r.asked}</td><td>${r.fast}</td></tr>`).join('')}</table>`;
+    if ($('#tab-stu').classList.contains('on')) this.renderStu();
+  },
+  renderStu() {
+    const P = S.players;
+    $('#stuTable').innerHTML = `<table class="t"><tr><th></th><th>이름</th><th>상태</th><th>라운드</th><th>코인</th><th>팀</th><th>승/패/무</th><th>정답</th><th>정답률</th><th>번개</th><th>내보내기</th></tr>${P.map(p => `<tr><td><img src="${IMG('r_' + p.avatar)}"></td><td>${esc(p.name)}</td><td><span class="chip ${p.online ? p.phase : 'off'}">${p.online ? PH[p.phase] : '연결 끊김'}</span></td><td>${Math.min(p.round, S.settings.rounds)} / ${S.settings.rounds}</td><td>${p.coins}</td><td>${p.team.map(u => `<img src="${IMG('r_' + u.k)}" title="Lv.${u.lv}">`).join('')}</td><td>${p.wins} / ${p.losses} / ${p.draws}</td><td>${p.ok}/${p.asked}</td><td>${p.asked ? Math.round(p.ok / p.asked * 100) : 0}%</td><td>${p.fast}</td><td><button class="gbtn trash" onclick="T.kick('${p.id}','${esc(p.name)}')"><img src="${IMG('i_trash')}" alt="내보내기"></button></td></tr>`).join('')}</table>` + (P.length ? '' : '<p style="text-align:center;font-size:26px;margin-top:120px">아직 들어온 학생이 없어요</p>');
+  },
+  /* ----- 문제 ----- */
+  renderQ() {
+    $('#qCnt').textContent = `모두 ${QS.length}문제 · 저장하면 지금 방에도 바로 적용돼요`;
+    $('#qTable').innerHTML = `<table class="t"><tr><th>번호</th><th>그림</th><th>문제</th><th>정답</th><th>오답</th><th></th></tr>${QS.map((q, i) => `<tr><td style="text-align:center">${i + 1}</td><td>${q.pic ? `<img src="${IMG('r_' + q.pic)}">` : ''}</td><td>${esc(q.q)}${q.hint ? `<br><small style="color:#8a5a2b">힌트: ${esc(q.hint)}</small>` : ''}</td><td><b>${esc(q.a)}</b></td><td style="font-size:17px">${q.w.map(esc).join('<br>')}</td><td style="white-space:nowrap"><button class="cssbtn blue mb" onclick="T.qEdit(${i})">수정</button> <button class="cssbtn red mb" onclick="T.qDel(${i})">삭제</button></td></tr>`).join('')}</table>`;
+    $('#fPic').innerHTML = ['', ...AP.KEYS].map(k => `<button class="${k === fPic ? 'sel' : ''}" onclick="T.setPic('${k}')">${k ? `<img src="${IMG('r_' + k)}">` : '없음'}</button>`).join('');
+    $('#bulk').value = QS.map(q => [q.q, q.a, ...q.w, q.pic || '', q.hint || ''].join(' | ')).join('\n');
+  },
+  setPic(k) { fPic = k; this.renderQ(); },
+  qEdit(i) { const q = QS[i]; editIdx = i; $('#fQ').value = q.q; $('#fA').value = q.a; $('#fW1').value = q.w[0] || ''; $('#fW2').value = q.w[1] || ''; $('#fW3').value = q.w[2] || ''; $('#fH').value = q.hint || ''; fPic = q.pic || ''; $('#qeTitle').innerHTML = `<img src="${IMG('i_book')}">${i + 1}번 문제 수정`; this.renderQ(); },
+  qClear() { editIdx = -1; ['#fQ', '#fA', '#fW1', '#fW2', '#fW3', '#fH'].forEach(s => $(s).value = ''); fPic = ''; $('#qeTitle').innerHTML = `<img src="${IMG('i_book')}">문제 추가`; this.renderQ(); },
+  qSave() {
+    const q = { q: $('#fQ').value.trim(), a: $('#fA').value.trim(), w: [$('#fW1').value, $('#fW2').value, $('#fW3').value].map(s => s.trim()).filter(Boolean), pic: fPic, hint: $('#fH').value.trim() };
+    if (!q.q || !q.a || !q.w.length) return toast('질문, 정답, 오답 1개 이상을 써 주세요');
+    if (editIdx >= 0) QS[editIdx] = q; else QS.push(q);
+    this.qPush(); this.qClear();
+  },
+  qDel(i) { if (!confirm(`${i + 1}번 문제를 지울까요?`)) return; QS.splice(i, 1); this.qPush(); this.renderQ(); },
+  qPreview() { const q = { q: $('#fQ').value, a: $('#fA').value }; VOICE.say(AP.speechA(q) || AP.speechQ(q)); },
+  bulkAdd(replace) {
+    const list = $('#bulk').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const p = l.split('|').map(s => s.trim()); return { q: p[0], a: p[1], w: [p[2], p[3], p[4]].filter(Boolean), pic: CH[p[5]] ? p[5] : '', hint: p[6] || '' }; }).filter(q => q.q && q.a && q.w.length);
+    if (list.length < (replace ? 3 : 1)) return toast('문제를 바르게 써 주세요');
+    if (replace) { if (!confirm(`문제 목록을 ${list.length}문제로 바꿀까요?`)) return; QS = list; }
+    else { const have = new Set(QS.map(q => q.q + '|' + q.a)); list.forEach(q => { if (!have.has(q.q + '|' + q.a)) QS.push(q); }); }
+    this.qPush(); this.renderQ();
+  },
+  async qPush() {
+    store.set('t_questions', QS);
+    if (S) { const r = await emit('t:questions', { questions: QS }); if (r.ok) toast(`문제 ${r.n}개를 저장했어요`); else toast(r.msg || '저장하지 못했어요'); }
+  },
+  /* ----- 설정 ----- */
+  renderSet() {
+    const seg = (k, vals) => `<div class="seg">${vals.map(v => `<button class="${SET[k] === v ? 'sel' : ''}" onclick="T.setOpt('${k}',${v})">${v}</button>`).join('')}</div>`;
+    $('#setBox').innerHTML = `
+      <div class="setrow"><span>전체 라운드 수<small>학생 한 명이 하는 대결 횟수</small></span>${seg('rounds', [3, 4, 5, 6, 8, 10])}</div>
+      <div class="setrow"><span>라운드마다 문제 수</span>${seg('qPer', [2, 3, 4, 5, 6])}</div>
+      <div class="setrow"><span>번개 정답 시간(초)<small>이 시간 안에 맞히면 코인 +1, 공격 +1</small></span>${seg('fastSec', [5, 8, 10, 15])}</div>
+      <div class="setrow"><span>혼자 기다릴 때(초)<small>상대가 없으면 친구 팀 기록과 대결</small></span>${seg('waitSec', [15, 25, 40, 60])}</div>
+      <div class="setrow"><span>효과음</span><div class="seg"><button class="${SND.on ? 'sel' : ''}" onclick="SND.on=true;store.set('sound',true);T.renderSet()">켜기</button><button class="${!SND.on ? 'sel' : ''}" onclick="SND.on=false;store.set('sound',false);T.renderSet()">끄기</button></div></div>
+      <div style="display:flex;gap:14px;justify-content:center;margin-top:16px">
+        <button class="cssbtn cream" style="position:relative;width:300px;height:60px;font-size:24px" onclick="T.reset()">처음 상태로 (같은 학생)</button>
+        <button class="cssbtn red" style="position:relative;width:300px;height:60px;font-size:24px" onclick="T.newRoom()">새 방 만들기</button>
+      </div>`;
+  },
+  async setOpt(k, v) { SET[k] = v; store.set('t_settings', SET); if (S) await emit('t:settings', { settings: SET }); this.renderSet(); },
+  reset() { if (confirm('모든 학생의 기록을 지우고 대기실로 되돌릴까요?')) this.call('t:reset', {}, '처음 상태로 되돌렸어요'); },
+  newRoom() { if (!confirm('지금 방을 닫고 새 방을 만들까요?')) return; store.del('t_room'); location.reload(); },
+  csv() {
+    if (!S) return;
+    const rows = [['순위', '이름', '승', '패', '무', '정답', '문제 수', '정답률', '번개 정답', '평균 정답 시간(초)']].concat(S.rank.map(r => [r.rank, r.name, r.wins, r.losses, r.draws, r.ok, r.asked, r.rate + '%', r.fast, r.avg]));
+    const blob = new Blob(['﻿' + rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `autopets_결과_${S.code}.csv`; a.click();
+  }
+};
+
+socket.on('t:state', s => { S = s; SET = { ...SET, ...s.settings }; T.render(); });
+socket.on('connect', async () => { $('#conn').classList.remove('on'); const ok = await T.resume(); if (!ok) { const s = store.get('t_room', null); $('#reInfo').textContent = s ? '' : ''; } });
+socket.on('disconnect', () => $('#conn').classList.add('on'));
+$('#dexBox').innerHTML = dexHtml().replace(/<p[\s\S]*<\/p>$/, '');
+fit();
+</script>
+</body>
+</html>

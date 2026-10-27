@@ -1,0 +1,19 @@
+{
+  "name": "traditional-autopets",
+  "version": "1.0.0",
+  "description": "6학년 영어 11단원 복습용 전통문화 Auto Pets (교사 배정 · 학생 대결)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.21.2",
+    "msedge-tts": "^2.0.0",
+    "socket.io": "^4.8.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
