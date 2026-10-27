@@ -61,7 +61,7 @@ app.get('/tts', async (req, res) => {
     await pending.get(h);
     res.set('Cache-Control', 'public, max-age=86400').sendFile(cached);
   } catch (e) {
-    console.warn('[tts] 실패:', e.message);
+    console.warn('[tts] 실패:', (e && (e.message || e.reason || e.type)) || String(e));
     res.status(404).end();
   }
 });
