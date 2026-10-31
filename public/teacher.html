@@ -210,8 +210,8 @@ const T = {
     store.del('t_room'); return false;
   },
   async call(ev, d, okMsg) { const r = await emit(ev, d); if (!r.ok) { toast(r.msg || '할 수 없어요'); SND.no(); } else { if (okMsg) toast(okMsg); SND.click(); } return r; },
-  assign() { if (S && S.status === 'playing' && !confirm('게임 중이에요. 1라운드 배정을 다시 할까요?')) return; this.call('t:assign', {}, '상대를 자동으로 배정했어요!'); },
-  start() { this.call('t:start', {}, '게임을 시작했어요!'); },
+  assign() { if (S && S.status === 'playing' && !confirm('게임 중이에요. 1라운드 배정을 다시 할까요?')) return; this.call('t:assign', {}, '상대를 자동으로 배정했어요!').then(r => r.ok && SND.assigned()); },
+  start() { this.call('t:start', {}, '게임을 시작했어요!').then(r => r.ok && SND.match()); },
   pause() { this.call('t:pause', { paused: !(S && S.paused) }); },
   matchNow() { this.call('t:matchNow', {}, '기다리는 학생을 바로 대결시켰어요'); },
   end() { if (confirm('게임을 끝낼까요? 학생들 화면에 최종 순위가 나와요.')) this.call('t:end', {}, '게임을 끝냈어요'); },
@@ -273,12 +273,13 @@ const T = {
       <div class="setrow"><span>라운드마다 문제 수</span>${seg('qPer', [2, 3, 4, 5, 6])}</div>
       <div class="setrow"><span>번개 정답 시간(초)<small>이 시간 안에 맞히면 코인 +1, 공격 +1</small></span>${seg('fastSec', [5, 8, 10, 15])}</div>
       <div class="setrow"><span>혼자 기다릴 때(초)<small>상대가 없으면 친구 팀 기록과 대결</small></span>${seg('waitSec', [15, 25, 40, 60])}</div>
-      <div class="setrow"><span>효과음</span><div class="seg"><button class="${SND.on ? 'sel' : ''}" onclick="SND.on=true;store.set('sound',true);T.renderSet()">켜기</button><button class="${!SND.on ? 'sel' : ''}" onclick="SND.on=false;store.set('sound',false);T.renderSet()">끄기</button></div></div>
+      <div class="setrow"><span>효과음 크기<small>선생님 화면의 소리 (학생은 각자 설정에서 바꿔요)</small></span><div class="seg">${[['big', '크게'], ['mid', '보통'], ['small', '작게'], ['off', '끄기']].map(([k, n]) => `<button class="${(k === 'off' ? !SND.on : SND.on && SND.level === k) ? 'sel' : ''}" onclick="T.setSnd('${k}')">${n}</button>`).join('')}</div></div>
       <div style="display:flex;gap:14px;justify-content:center;margin-top:16px">
         <button class="cssbtn cream" style="position:relative;width:300px;height:60px;font-size:24px" onclick="T.reset()">처음 상태로 (같은 학생)</button>
         <button class="cssbtn red" style="position:relative;width:300px;height:60px;font-size:24px" onclick="T.newRoom()">새 방 만들기</button>
       </div>`;
   },
+  setSnd(k) { if (k === 'off') { SND.on = false; store.set('sound', false); } else { SND.on = true; store.set('sound', true); SND.setLevel(k); SND.play('coin', { gap: 0 }); } this.renderSet(); },
   async setOpt(k, v) { SET[k] = v; store.set('t_settings', SET); if (S) await emit('t:settings', { settings: SET }); this.renderSet(); },
   reset() { if (confirm('모든 학생의 기록을 지우고 대기실로 되돌릴까요?')) this.call('t:reset', {}, '처음 상태로 되돌렸어요'); },
   newRoom() { if (!confirm('지금 방을 닫고 새 방을 만들까요?')) return; store.del('t_room'); location.reload(); },

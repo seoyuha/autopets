@@ -315,7 +315,7 @@ table.rank img{height:44px;display:inline-block;vertical-align:middle}
   <div id="pickRib" class="ribbon gold">캐릭터를 선택하세요!</div>
   <div id="picks"></div>
   <div id="joinNote" class="abs">문제를 많이, 빨리 맞힐수록 내 친구들이 더 강해져요!</div>
-  <button id="joinBack" class="gbtn" onclick="UI.go('title')"><img src="img/y_back.webp" alt="이전으로"></button>
+  <button id="joinBack" class="gbtn" onclick="SND.back();UI.go('title')"><img src="img/y_back.webp" alt="이전으로"></button>
   <button id="joinOk" class="gbtn" onclick="UI.join()"><img src="img/y_ok.webp" alt="확인"></button>
 </section>
 
@@ -463,7 +463,7 @@ const UI = {
   renderPicks() {
     $('#picks').innerHTML = AP.KEYS.map(k => { const c = CH[k]; return `<button class="pick ${k === pick ? 'sel' : ''}" onclick="UI.pick('${k}')"><img class="ci" src="${IMG('c_' + k)}"><img class="nm" src="${IMG('n_' + k)}"><div class="ro">${c.role}</div><div class="stats"><img src="${IMG('i_heart')}"><span>${c.hp}</span><img src="${IMG('i_sword')}"><span>${c.atk}</span></div></button>`; }).join('');
   },
-  pick(k) { pick = k; store.set('avatar', k); SND.click(); this.renderPicks(); },
+  pick(k) { pick = k; store.set('avatar', k); SND.select(); this.renderPicks(); },
   async join() {
     const code = $('#inCode').value.trim(), name = $('#inName').value.trim();
     if (!/^\d{4}$/.test(code)) { toast('방 번호 4자리를 써 주세요!'); SND.no(); return; }
@@ -471,7 +471,7 @@ const UI = {
     const r = await emit('s:join', { code, name, avatar: pick });
     if (!r.ok) { toast(r.msg || '들어갈 수 없어요.'); SND.no(); return; }
     store.set('code', code); store.set('name', name); store.set('token', r.token);
-    SND.ok();
+    SND.select();
   },
   how() {
     modal('게임 방법', `
@@ -491,12 +491,13 @@ const UI = {
     const v = store.get('voice', true);
     modal('설정', `
       <div style="display:flex;justify-content:space-between;align-items:center;background:#fffaf0;border:4px solid #e7cf9f;border-radius:22px;padding:14px 24px;margin:20px 0">
-        <span>🔊 효과음</span><div style="display:flex;gap:10px"><button class="cssbtn ${SND.on ? 'blue' : 'cream'}" style="position:relative;width:120px;height:64px" onclick="SND.on=true;store.set('sound',true);UI.settings()">켜기</button><button class="cssbtn ${!SND.on ? 'blue' : 'cream'}" style="position:relative;width:120px;height:64px" onclick="SND.on=false;store.set('sound',false);UI.settings()">끄기</button></div></div>
+        <span>🔊 효과음 크기</span><div style="display:flex;gap:10px">${[['big', '크게'], ['mid', '보통'], ['small', '작게'], ['off', '끄기']].map(([k, n]) => { const sel = k === 'off' ? !SND.on : SND.on && SND.level === k; return `<button class="cssbtn ${sel ? 'blue' : 'cream'}" style="position:relative;width:110px;height:64px" onclick="UI.setSnd('${k}')">${n}</button>`; }).join('')}</div></div>
       <div style="display:flex;justify-content:space-between;align-items:center;background:#fffaf0;border:4px solid #e7cf9f;border-radius:22px;padding:14px 24px;margin:20px 0">
         <span>🗣️ 원어민 문장 읽기</span><div style="display:flex;gap:10px"><button class="cssbtn ${v ? 'blue' : 'cream'}" style="position:relative;width:120px;height:64px" onclick="store.set('voice',true);UI.settings()">켜기</button><button class="cssbtn ${!v ? 'blue' : 'cream'}" style="position:relative;width:120px;height:64px" onclick="store.set('voice',false);VOICE.stop();UI.settings()">끄기</button></div></div>
       <div style="text-align:center"><button class="cssbtn green" style="position:relative;display:inline-flex;width:360px;height:70px" onclick="VOICE.say('Do you know about songpyeon? Yes, I do.')">목소리 들어 보기</button></div>
       ${ME ? `<div style="text-align:center;margin-top:30px"><button class="cssbtn red" style="position:relative;display:inline-flex;width:360px;height:70px" onclick="UI.leave()">방에서 나가기</button></div>` : ''}`, 1000, 640);
   },
+  setSnd(k) { if (k === 'off') { SND.on = false; store.set('sound', false); } else { SND.on = true; store.set('sound', true); SND.setLevel(k); SND.play('coin', { gap: 0 }); } this.settings(); },
   leave() { if (!confirm('방에서 나갈까요? 같은 이름으로 다시 들어오면 이어서 할 수 있어요.')) return; store.del('token'); location.reload(); },
   closeSplash() { $('#doneSplash').classList.remove('on'); SND.click(); }
 };
@@ -552,9 +553,9 @@ const Q = {
     setTimeout(() => this.sayQ(), 350);
   },
   timer() {
-    cancelAnimationFrame(this.raf);
+    cancelAnimationFrame(this.raf); this.tu = false;
     const lim = (ME.fastSec || 8) * 1000, bar = $('#qTimer i');
-    const tick = () => { const e = performance.now() - this.t0; bar.style.transform = `scaleX(${Math.max(0, 1 - e / lim)})`; bar.style.opacity = e > lim ? .25 : 1; if (!this.locked && e < lim + 100) this.raf = requestAnimationFrame(tick); };
+    const tick = () => { const e = performance.now() - this.t0; bar.style.transform = `scaleX(${Math.max(0, 1 - e / lim)})`; bar.style.opacity = e > lim ? .25 : 1; if (!this.locked && e >= lim && !this.tu) { this.tu = true; SND.play('timeup', { vol: .7 }); } if (!this.locked && e < lim + 100) this.raf = requestAnimationFrame(tick); };
     tick();
   },
   async sayQ() { const q = ME && ME.question; if (!q || !q.sayQ) return; $('#speak').classList.add('playing'); await VOICE.say(q.sayQ); $('#speak').classList.remove('playing'); },
@@ -567,7 +568,7 @@ const Q = {
     this.hist[ME.question.n - 1] = { good: r.good, fast: r.fast };
     const big = $('#qBig');
     if (r.good) {
-      el.classList.add('right'); SND.ok(); if (r.fast) setTimeout(() => SND.fast(), 300);
+      el.classList.add('right'); SND.ok(); if (r.fast) setTimeout(() => SND.fast(), 420);
       $('#qBigW').textContent = r.fast ? '번개 정답!' : '정답!';
       $('#qBigS').innerHTML = `<img src="${IMG('i_coin')}">+${r.coin} <img src="${IMG('i_heart')}">+1 ${r.fast ? `<img src="${IMG('i_sword')}">+1` : ''} <span style="font-size:26px;color:#8a5a2b">(${r.sec}초)</span>`;
       praise(true, 1000, 190, 260);
@@ -588,6 +589,7 @@ const Q = {
   },
   async next() {
     clearTimeout(this.autoT);
+    if (UI.cur !== 'quiz') return;
     if (!$('#qNext').classList.contains('on') && !this.locked) return;
     $('#qNext').classList.remove('on'); SND.click(); VOICE.stop();
     const r = await emit('s:next');
@@ -645,15 +647,15 @@ const Shop = {
     this.sel = (this.sel === i || !ME.team[i]) ? -1 : i; SND.click(); this.render();
   },
   async sell() { const r = await emit('s:sell', { i: this.sel }); if (!r.ok) { toast(r.msg || '보낼 수 없어요'); SND.no(); return; } SND.coin(); this.sel = -1; },
-  async refresh() { const r = await emit('s:refresh'); if (!r.ok) { toast(r.msg || '코인이 부족해요!'); SND.no(); return; } SND.click(); },
+  async refresh() { const r = await emit('s:refresh'); if (!r.ok) { toast(r.msg || '코인이 부족해요!'); SND.no(); return; } SND.refresh(); },
   async ready() { const r = await emit('s:ready'); if (!r.ok) { toast(r.msg || '준비할 수 없어요'); SND.no(); return; } SND.click(); this.sel = -1; }
 };
 
 /* ===================== 전투 재생 ===================== */
-const SKILL = { song: ['송편 비!', 'e_leaf', 'heal'], tuho: ['연속 투호!', 'e_star', 'arrow'], hanbok: ['화려한 검술!', 'e_spiral', 'shield'], gat: ['부채 바람!', 'e_water', 'magic'], hanji: ['한지 소환!', 'e_star', 'shield'], kimchi: ['매운 김치!', 'e_fire', 'fire'] };
+const SKILL = { song: ['송편 비!', 'e_leaf', 'heal'], tuho: ['연속 투호!', 'e_star', 'arrow'], hanbok: ['화려한 검술!', 'e_spiral', 'sword'], gat: ['부채 바람!', 'e_water', 'wind'], hanji: ['한지 소환!', 'e_star', 'spell'], kimchi: ['매운 김치!', 'e_fire', 'fire'] };
 const B = {
   speed: store.get('speed', 1), id: null, U: {}, pos: {}, playing: false, b: null,
-  setSpeed(s) { this.speed = s; if (s < 10) store.set('speed', s); $$('#speedbox button').forEach(x => x.classList.toggle('sel', +x.dataset.sp === s)); SND.click(); },
+  setSpeed(s, silent) { this.speed = s; SND.hush = s >= 10; if (s < 10) store.set('speed', s); $$('#speedbox button').forEach(x => x.classList.toggle('sel', +x.dataset.sp === s)); if (!silent) SND.click(); },
   w(ms) { return sleep(ms / this.speed); },
   disp(side) { return this.b.me === 'L' ? side : (side === 'L' ? 'R' : 'L'); },
   x(u) { const arr = this.pos[u.dside] || []; const i = arr.indexOf(u.id); return u.dside === 'L' ? 640 - i * 135 : 1032 + i * 135; },
@@ -666,14 +668,14 @@ const B = {
     this.U = {}; this.pos = { L: [], R: [] };
     for (const u of b.units) { const d = { ...u, dside: this.disp(u.side) }; this.U[u.id] = d; this.pos[d.dside].push(u.id); }
     Object.values(this.U).forEach(u => this.draw(u));
-    this.setSpeed(this.speed >= 10 ? 1 : this.speed);
+    this.setSpeed(this.speed >= 10 ? 1 : this.speed, true);
     SND.match();
     // 정답 파워 보여 주기
     const g = b.gained || [];
     if (g.length) {
       const hp = g.filter(x => x.t === 'hp').length, at = g.filter(x => x.t === 'atk').length;
       const pb = $('#pwBanner'); pb.innerHTML = `<img src="${IMG('i_wingstar')}">정답 파워! <img src="${IMG('i_heart')}">+${hp} ${at ? `<img src="${IMG('i_sword')}">+${at}` : ''}`;
-      pb.classList.add('on'); Object.values(this.U).filter(u => u.dside === 'L').forEach(u => this.fx('fx_stars', u, 130)); SND.merge();
+      pb.classList.add('on'); Object.values(this.U).filter(u => u.dside === 'L').forEach(u => this.fx('fx_stars', u, 130)); setTimeout(() => SND.shield(), 500);
       await this.w(1600); pb.classList.remove('on');
     }
     for (const st of b.steps) {
@@ -716,8 +718,8 @@ const B = {
       case 'log': this.log(e.txt); break;
       case 'skill': { const u = U(e.u), s = SKILL[e.key]; this.lunge(u, 16); SND[s[2]](); const c = this.center(u); const f = document.createElement('div'); f.className = 'callout'; f.innerHTML = `<img src="${IMG(s[1])}">${s[0]}`; f.style.left = c.x + 'px'; f.style.top = (c.y - 300) + 'px'; $('#battle').appendChild(f); setTimeout(() => f.remove(), 1000 / Math.min(this.speed, 2)); this.log(`${this.side(u)} ${CH[u.k].name}: ${s[0]}`); break; }
       case 'fx': this.fx(e.key, U(e.to)); break;
-      case 'shot': this.shot(e.key, U(e.from), U(e.to)); break;
-      case 'hurt': { const u = U(e.u); const el = $('#u' + u.id); if (el) { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); } if (e.n > 0) this.float(u, '-' + e.n, 'dmg'); else if (e.blocked) this.float(u, '막음!', 'sh'); break; }
+      case 'shot': this.shot(e.key, U(e.from), U(e.to)); if (e.key === 'fx_arrows') SND.arrow(); break;
+      case 'hurt': { const u = U(e.u); const el = $('#u' + u.id); if (el) { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); } if (e.n > 0) this.float(u, '-' + e.n, 'dmg'); else if (e.blocked) { this.float(u, '막음!', 'sh'); SND.shield(); } break; }
       case 'set': { const u = U(e.u); Object.assign(u, { hp: e.hp, max: e.max, sh: e.sh, arm: e.arm, burn: e.burn, atk: e.atk }); this.draw(u); break; }
       case 'pop': this.float(U(e.u), e.txt, e.c); break;
       case 'die': { const u = U(e.u); u.gone = true; const el = $('#u' + u.id); if (el) { el.classList.add('dead'); setTimeout(() => el.remove(), 600); } this.log(`${this.side(u)} ${CH[u.k].name}이(가) 쓰러졌어요.`); break; }
@@ -736,7 +738,7 @@ const B = {
     $('#bresBtnImg').src = IMG(last ? 'y_ok' : 'b_next');
     $('#bresBtn').style.cssText = last ? 'left:230px;top:590px;width:440px;height:66px' : '';
     $('#bres').classList.add('on');
-    win ? SND.win() : lose ? SND.lose() : SND.click();
+    SND.hush = false; win ? SND.win() : lose ? SND.lose() : SND.shield();
     if (win) { const p = stagePos($('#bres .frame')); fxAt('fx_stars', p.x + p.w / 2, p.y + 100, 300, 1400); }
   },
   async done() { SND.click(); $('#bres').classList.remove('on'); this.id = this.b ? this.b.id : null; await emit('s:battleDone'); }
@@ -754,7 +756,7 @@ function route() {
     if (fromQuiz) {
       Shop.splash = false; const ok = Q.hist.filter(h => h && h.good).length, fast = Q.hist.filter(h => h && h.fast).length;
       $('#doneGrid').innerHTML = `<div>정답<b>${ok}/${ME.qPer}</b></div><div>번개 정답<b>${fast}</b></div><div>내 코인<b>${ME.coins}</b></div>`;
-      $('#doneSplash').classList.add('on'); SND.win();
+      $('#doneSplash').classList.add('on'); SND.chest();
     }
     return;
   }
@@ -793,8 +795,10 @@ function renderDone() {
 }
 
 socket.on('me', v => {
-  const prevPhase = ME && ME.phase;
+  const prevPhase = ME && ME.phase, hadPartner = !!(ME && ME.partner);
   ME = v; route();
+  if (v.phase === 'lobby' && v.partner && !hadPartner && prevPhase) SND.assigned();
+  if (prevPhase === 'lobby' && v.phase === 'quiz') SND.countdown();
   if (prevPhase === 'waiting' && v.phase === 'battle') toast(`<b>${esc(v.battle.opp.name)}</b> 와(과) 대결해요!`, 1400);
 });
 socket.on('lobby', d => { LOBBY = d; if (UI.cur === 'lobby') renderLobby(); if (UI.cur === 'done') renderDone(); if (ME && d.paused !== ME.paused) { ME.paused = d.paused; $('#pauseLay').classList.toggle('on', !!d.paused); } });
